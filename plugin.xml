@@ -1,0 +1,17 @@
+<library path="lib/librqt_gen2">
+  <class name="rqt_gen2/MyPlugin" type="rqt_gen2::MyPlugin" base_class_type="rqt_gui_cpp::Plugin">
+    <description>
+      A C++ GUI plugin for publishing Gen2 topics.
+    </description>
+    <qtgui>
+      <group>
+        <label>Robot Tools</label>
+        <icon type="theme">folder</icon>
+        <statustip>Plugins related to robot tools.</statustip>
+      </group>
+      <label>Gen2 (experimental)</label>
+      <icon type="theme">input-gaming</icon>
+      <statustip>A C++ GUI plugin for maneuvering Gen2.</statustip>
+    </qtgui>
+  </class>
+</library>
