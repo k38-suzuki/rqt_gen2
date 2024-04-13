@@ -4,8 +4,8 @@
 
 #include "rqt_gen2/my_widget.h"
 
-#include "ros/ros.h"
-#include "sensor_msgs/Joy.h"
+#include <ros/ros.h>
+#include <sensor_msgs/Joy.h>
 
 #include <kinova_msgs/HomeArm.h>
 #include <kinova_msgs/JointVelocity.h>
@@ -18,7 +18,6 @@
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QLabel>
-#include <QSlider>
 #include <QSpinBox>
 #include <QTabWidget>
 #include <QTimer>
@@ -52,12 +51,9 @@ class TwistWidget : public QWidget
 public:
     TwistWidget(QWidget* parent = nullptr);
 
-    enum { TranslationMode, WristMode, FingerMode };
-
 private:
     void joyCallback(const sensor_msgs::Joy& msg);
 
-    void on_slider_valueChanged(int arg1, int arg2);
     void on_toolButton_toggled(bool checked);
     void on_timer_timeout();
 
@@ -71,7 +67,7 @@ private:
     int control_mode;
     double twist_linear[3];
     double twist_angular[3];
-    bool prevButtonState;
+    bool prev_button_state;
 };
 
 class HomeWidget : public QWidget
@@ -197,12 +193,7 @@ JointWidget::JointWidget(QWidget* parent)
 
 void JointWidget::on_toolButton_pressed(int arg1, int arg2)
 {
-    double value = 1.0;
-     if(arg2 == 0) {
-         value *= 1.0;
-     } else {
-         value *= -1.0;
-     }
+    double value = arg2 == 0 ? 1.0 : -1.0;
     joint_vel[arg1] = value * velSpins[arg1]->value();
 }
 
@@ -237,25 +228,21 @@ void JointWidget::on_timer_timeout()
 
 TwistWidget::TwistWidget(QWidget* parent)
     : QWidget(parent)
-    , control_mode(TranslationMode)
-    , prevButtonState(false)
+    , control_mode(0)
+    , prev_button_state(false)
 {
     joy_sub = n.subscribe("joy", 1, &TwistWidget::joyCallback, this);
 
-    const QStringList list2 = { "linear [m/s]", "angular [rad/s]" };
+    const QStringList list = { "linear [m/s]", "angular [rad/s]" };
+    const double upper[] = { 0.20, 1.07 };
 
-    auto gridLayout2 = new QGridLayout;
+    auto formLayout = new QFormLayout;
     for(int i = 0; i < 2; ++i) {
-        auto slider = new QSlider(Qt::Horizontal);
-        connect(slider, &QSlider::valueChanged,
-            [=](int value){ on_slider_valueChanged(i, value); });
-
         twistSpins[i] = new QDoubleSpinBox;
-        twistSpins[i]->setEnabled(false);
-
-        gridLayout2->addWidget(new QLabel(list2.at(i)), i, 0);
-        gridLayout2->addWidget(slider, i, 1);
-        gridLayout2->addWidget(twistSpins[i], i, 2);
+        twistSpins[i]->setRange(0.0, upper[i]);
+        twistSpins[i]->setValue(upper[i]);
+        twistSpins[i]->setSingleStep(0.01);
+        formLayout->addRow(new QLabel(list.at(i)), twistSpins[i]);
     }
 
     auto button = new QToolButton;
@@ -274,7 +261,7 @@ TwistWidget::TwistWidget(QWidget* parent)
 
     auto layout = new QVBoxLayout;
     layout->addLayout(layout2);
-    layout->addLayout(gridLayout2);
+    layout->addLayout(formLayout);
     layout->addStretch();
     setLayout(layout);
 }
@@ -282,12 +269,6 @@ TwistWidget::TwistWidget(QWidget* parent)
 void TwistWidget::joyCallback(const sensor_msgs::Joy& msg)
 {
     latestJoyState = msg;
-}
-
-void TwistWidget::on_slider_valueChanged(int arg1, int arg2)
-{
-    double rate[] = { 0.002, 0.0107 };
-    twistSpins[arg1]->setValue(rate[arg1] * (double)arg2);
 }
 
 void TwistWidget::on_toolButton_toggled(bool checked)
@@ -305,12 +286,12 @@ void TwistWidget::on_timer_timeout()
     twist_linear[0] = twist_linear[1] = twist_linear[2] = 0.0;
     twist_angular[0] = twist_angular[1] = twist_angular[2] = 0.0;
     if(joy.axes.size() && joy.buttons.size()) {
-        bool currentState = joy.buttons[1];
-        if(currentState && !prevButtonState) {
-            control_mode = control_mode == TranslationMode ? WristMode : TranslationMode;
-            ROS_INFO("Move to %s-mode.", control_mode == TranslationMode ? "translation" : "wrist");
+        bool current_state = joy.buttons[1];
+        if(current_state && !prev_button_state) {
+            control_mode = control_mode == 0 ? 1 : 0;
+            ROS_INFO("Move to %s-mode.", control_mode == 0 ? "translation" : "wrist");
         }
-        prevButtonState = currentState;
+        prev_button_state = current_state;
 
         const double linear_vel = twistSpins[0]->value();
         const double angular_vel = twistSpins[1]->value();
@@ -324,14 +305,14 @@ void TwistWidget::on_timer_timeout()
 
     if(twist_pub) {
         kinova_msgs::PoseVelocity twist_msg;
-        if(control_mode == TranslationMode) {
+        if(control_mode == 0) {
             twist_msg.twist_linear_x = twist_linear[0];
             twist_msg.twist_linear_y = twist_linear[1];
             twist_msg.twist_linear_z = twist_linear[2];
             twist_msg.twist_angular_x = 0.0;
             twist_msg.twist_angular_y = 0.0;
             twist_msg.twist_angular_z = 0.0;
-        } else if(control_mode == WristMode) {
+        } else if(control_mode == 1) {
             twist_msg.twist_linear_x = 0.0;
             twist_msg.twist_linear_y = 0.0;
             twist_msg.twist_linear_z = 0.0;
@@ -407,9 +388,9 @@ void FingerWidget::on_toolButton_clicked()
     ROS_INFO("Action server started, sending goal.");
     // send a goal to the action
     kinova_msgs::SetFingersPositionGoal goal;
-    goal.fingers.finger1 = fingerSpins[0]->value() * FingerMaxTurn;
-    goal.fingers.finger2 = fingerSpins[1]->value() * FingerMaxTurn;
-    goal.fingers.finger3 = fingerSpins[2]->value() * FingerMaxTurn;
+    goal.fingers.finger1 = ((double)fingerSpins[0]->value() / 100.0) * FingerMaxTurn;
+    goal.fingers.finger2 = ((double)fingerSpins[1]->value() / 100.0) * FingerMaxTurn;
+    goal.fingers.finger3 = ((double)fingerSpins[2]->value() / 100.0) * FingerMaxTurn;
     ac.sendGoal(goal);
 
     //wait for the action to return
