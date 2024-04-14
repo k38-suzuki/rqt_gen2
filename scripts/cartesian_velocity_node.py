@@ -8,14 +8,14 @@ def talker():
     rospy.init_node('gen2_ros', anonymous=True)
     rate = rospy.Rate(100)
     while not rospy.is_shutdown():
-        pose_velocity_msg = kinova_msgs.msg.PoseVelocity()
-        pose_velocity_msg.twist_linear_x = 0.0
-        pose_velocity_msg.twist_linear_y = 0.0
-        pose_velocity_msg.twist_linear_z = 0.0
-        pose_velocity_msg.twist_angular_x = 0.0
-        pose_velocity_msg.twist_angular_y = 0.0
-        pose_velocity_msg.twist_angular_z = 0.0
-        pub.publish(pose_velocity_msg)
+        twist_msg = kinova_msgs.msg.PoseVelocity()
+        twist_msg.twist_linear_x = 0.0
+        twist_msg.twist_linear_y = 0.0
+        twist_msg.twist_linear_z = 0.0
+        twist_msg.twist_angular_x = 0.0
+        twist_msg.twist_angular_y = 0.0
+        twist_msg.twist_angular_z = 0.0
+        pub.publish(twist_msg)
         rate.sleep()
 
 if __name__ == '__main__':

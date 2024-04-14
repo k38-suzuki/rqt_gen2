@@ -347,26 +347,26 @@ void MainWindow::Impl::on_pushButton_released(int arg1)
 void MainWindow::Impl::on_timer_timeout()
 {
     if(tabWidget->currentIndex() == 0) {
-        kinova_msgs::JointVelocity joint_velocity_msg;
-        joint_velocity_msg.joint1 = joint_velocity[0];
-        joint_velocity_msg.joint2 = joint_velocity[1];
-        joint_velocity_msg.joint3 = joint_velocity[2];
-        joint_velocity_msg.joint4 = joint_velocity[3];
-        joint_velocity_msg.joint5 = joint_velocity[4];
-        joint_velocity_msg.joint6 = joint_velocity[5];
-        joint_velocity_msg.joint7 = joint_velocity[6];
-        joint_pub.publish(joint_velocity_msg);
+        kinova_msgs::JointVelocity joint_msg;
+        joint_msg.joint1 = joint_velocity[0];
+        joint_msg.joint2 = joint_velocity[1];
+        joint_msg.joint3 = joint_velocity[2];
+        joint_msg.joint4 = joint_velocity[3];
+        joint_msg.joint5 = joint_velocity[4];
+        joint_msg.joint6 = joint_velocity[5];
+        joint_msg.joint7 = joint_velocity[6];
+        joint_pub.publish(joint_msg);
     } else if(tabWidget->currentIndex() == 1) {
         readState();
 
-        kinova_msgs::PoseVelocity pose_velocity_msg;
-        pose_velocity_msg.twist_linear_x = twist_linear[0];
-        pose_velocity_msg.twist_linear_y = twist_linear[1];
-        pose_velocity_msg.twist_linear_z = twist_linear[2];
-        pose_velocity_msg.twist_angular_x = twist_angular[0];
-        pose_velocity_msg.twist_angular_y = twist_angular[1];
-        pose_velocity_msg.twist_angular_z = twist_angular[2];
-        cartesian_pub.publish(pose_velocity_msg);
+        kinova_msgs::PoseVelocity twist_msg;
+        twist_msg.twist_linear_x = twist_linear[0];
+        twist_msg.twist_linear_y = twist_linear[1];
+        twist_msg.twist_linear_z = twist_linear[2];
+        twist_msg.twist_angular_x = twist_angular[0];
+        twist_msg.twist_angular_y = twist_angular[1];
+        twist_msg.twist_angular_z = twist_angular[2];
+        cartesian_pub.publish(twist_msg);
     }
 }
 
@@ -532,14 +532,14 @@ void CartesianWidget::on_timer_timeout()
         twist_angular[i] = twist_angular[i] * twistSpins[1]->value();
     }
 
-    kinova_msgs::PoseVelocity pose_velocity_msg;
-    pose_velocity_msg.twist_linear_x = twist_linear[0];
-    pose_velocity_msg.twist_linear_y = twist_linear[1];
-    pose_velocity_msg.twist_linear_z = twist_linear[2];
-    pose_velocity_msg.twist_angular_x = twist_angular[0];
-    pose_velocity_msg.twist_angular_y = twist_angular[1];
-    pose_velocity_msg.twist_angular_z = twist_angular[2];
-    cartesian_pub.publish(pose_velocity_msg);
+    kinova_msgs::PoseVelocity twist_msg;
+    twist_msg.twist_linear_x = twist_linear[0];
+    twist_msg.twist_linear_y = twist_linear[1];
+    twist_msg.twist_linear_z = twist_linear[2];
+    twist_msg.twist_angular_x = twist_angular[0];
+    twist_msg.twist_angular_y = twist_angular[1];
+    twist_msg.twist_angular_z = twist_angular[2];
+    cartesian_pub.publish(twist_msg);
 }
 
 void CartesianWidget::on_pushButton_pressed(int arg1)
