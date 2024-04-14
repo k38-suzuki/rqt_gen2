@@ -232,8 +232,6 @@ TwistWidget::TwistWidget(QWidget* parent)
     , control_mode(0)
     , prev_button_state(false)
 {
-    joy_sub = n.subscribe("joy", 1, &TwistWidget::joyCallback, this);
-
     const QStringList list = { "linear [m/s]", "angular [rad/s]" };
     const double upper[] = { 0.20, 1.07 };
 
@@ -275,10 +273,12 @@ void TwistWidget::on_toolButton_toggled(bool checked)
 {
     if(checked) {
         twist_pub = n.advertise<kinova_msgs::PoseVelocity>("/j2s7s300_driver/in/cartesian_velocity", 2);
+        joy_sub = n.subscribe("joy", 1, &TwistWidget::joyCallback, this);
         timer->start(1000 / 100);
     } else {
         timer->stop();
         twist_pub.shutdown();
+        joy_sub.shutdown();
     }
 }
 
