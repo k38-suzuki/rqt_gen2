@@ -39,6 +39,7 @@ private:
     void on_timer_timeout();
 
     QDoubleSpinBox* velSpins[NumJoints];
+    QTimer* timer;
 
     ros::NodeHandle n;
     ros::Publisher joint_pub;
@@ -58,6 +59,7 @@ private:
     void on_timer_timeout();
 
     QDoubleSpinBox* twistSpins[2];
+    QTimer* timer;
 
     ros::NodeHandle n;
     ros::Publisher twist_pub;
@@ -176,9 +178,8 @@ JointWidget::JointWidget(QWidget* parent)
     connect(button, &QToolButton::toggled,
         [&](bool checked){ on_toolButton_toggled(checked); });
 
-    auto timer = new QTimer(this);
+    timer = new QTimer(this);
     timer->connect(timer, &QTimer::timeout, [&](){ on_timer_timeout(); });
-    timer->start(1000 / 100);
 
     auto layout2 = new QHBoxLayout;
     layout2->addWidget(button);
@@ -206,24 +207,24 @@ void JointWidget::on_toolButton_toggled(bool checked)
 {
     if(checked) {
         joint_pub = n.advertise<kinova_msgs::JointVelocity>("/j2s7s300_driver/in/joint_velocity", 2);
+        timer->start(1000 / 100);
     } else {
+        timer->stop();
         joint_pub.shutdown();
     }
 }
 
 void JointWidget::on_timer_timeout()
 {
-    if(joint_pub) {
-        kinova_msgs::JointVelocity joint_msg;
-        joint_msg.joint1 = joint_vel[0];
-        joint_msg.joint2 = joint_vel[1];
-        joint_msg.joint3 = joint_vel[2];
-        joint_msg.joint4 = joint_vel[3];
-        joint_msg.joint5 = joint_vel[4];
-        joint_msg.joint6 = joint_vel[5];
-        joint_msg.joint7 = joint_vel[6];
-        joint_pub.publish(joint_msg);
-    }
+    kinova_msgs::JointVelocity joint_msg;
+    joint_msg.joint1 = joint_vel[0];
+    joint_msg.joint2 = joint_vel[1];
+    joint_msg.joint3 = joint_vel[2];
+    joint_msg.joint4 = joint_vel[3];
+    joint_msg.joint5 = joint_vel[4];
+    joint_msg.joint6 = joint_vel[5];
+    joint_msg.joint7 = joint_vel[6];
+    joint_pub.publish(joint_msg);
 }
 
 TwistWidget::TwistWidget(QWidget* parent)
@@ -251,9 +252,8 @@ TwistWidget::TwistWidget(QWidget* parent)
     connect(button, &QToolButton::toggled,
         [&](bool checked){ on_toolButton_toggled(checked); });
 
-    auto timer = new QTimer(this);
+    timer = new QTimer(this);
     timer->connect(timer, &QTimer::timeout, [&](){ on_timer_timeout(); });
-    timer->start(1000 / 100);
 
     auto layout2 = new QHBoxLayout;
     layout2->addWidget(button);
@@ -275,7 +275,9 @@ void TwistWidget::on_toolButton_toggled(bool checked)
 {
     if(checked) {
         twist_pub = n.advertise<kinova_msgs::PoseVelocity>("/j2s7s300_driver/in/cartesian_velocity", 2);
+        timer->start(1000 / 100);
     } else {
+        timer->stop();
         twist_pub.shutdown();
     }
 }
@@ -303,25 +305,23 @@ void TwistWidget::on_timer_timeout()
         twist_angular[2] = angular_vel * joy.axes[6];
     }
 
-    if(twist_pub) {
-        kinova_msgs::PoseVelocity twist_msg;
-        if(control_mode == 0) {
-            twist_msg.twist_linear_x = twist_linear[0];
-            twist_msg.twist_linear_y = twist_linear[1];
-            twist_msg.twist_linear_z = twist_linear[2];
-            twist_msg.twist_angular_x = 0.0;
-            twist_msg.twist_angular_y = 0.0;
-            twist_msg.twist_angular_z = 0.0;
-        } else if(control_mode == 1) {
-            twist_msg.twist_linear_x = 0.0;
-            twist_msg.twist_linear_y = 0.0;
-            twist_msg.twist_linear_z = 0.0;
-            twist_msg.twist_angular_x = twist_angular[0];
-            twist_msg.twist_angular_y = twist_angular[1];
-            twist_msg.twist_angular_z = twist_angular[2];
-        }
-        twist_pub.publish(twist_msg);
+    kinova_msgs::PoseVelocity twist_msg;
+    if(control_mode == 0) {
+        twist_msg.twist_linear_x = twist_linear[0];
+        twist_msg.twist_linear_y = twist_linear[1];
+        twist_msg.twist_linear_z = twist_linear[2];
+        twist_msg.twist_angular_x = 0.0;
+        twist_msg.twist_angular_y = 0.0;
+        twist_msg.twist_angular_z = 0.0;
+    } else if(control_mode == 1) {
+        twist_msg.twist_linear_x = 0.0;
+        twist_msg.twist_linear_y = 0.0;
+        twist_msg.twist_linear_z = 0.0;
+        twist_msg.twist_angular_x = twist_angular[0];
+        twist_msg.twist_angular_y = twist_angular[1];
+        twist_msg.twist_angular_z = twist_angular[2];
     }
+    twist_pub.publish(twist_msg);
 }
 
 HomeWidget::HomeWidget(QWidget* parent)
