@@ -11,6 +11,7 @@ namespace rqt_gen2 {
 
 class MyWidget : public QWidget
 {
+    Q_OBJECT
 public:
     MyWidget(QWidget* parent = nullptr);
 
