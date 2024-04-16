@@ -241,7 +241,7 @@ TwistWidget::TwistWidget(QWidget* parent)
         twistSpins[i]->setRange(0.0, upper[i]);
         twistSpins[i]->setValue(upper[i]);
         twistSpins[i]->setSingleStep(0.01);
-        formLayout->addRow(new QLabel(list.at(i)), twistSpins[i]);
+        formLayout->addRow(list.at(i), twistSpins[i]);
     }
 
     auto button = new QToolButton;
