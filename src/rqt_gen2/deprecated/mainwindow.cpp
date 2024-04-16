@@ -411,18 +411,18 @@ void MainWindow::Impl::createPage1Widget()
     for(int i = 0; i < NumJoints; ++i) {
         joint_velocity[i] = 0.0;
 
-        QDoubleSpinBox* spin = new QDoubleSpinBox;
+        auto spin = new QDoubleSpinBox;
         velocitySpins[i] = spin;
         spin->setValue(30.0);
         spin->setRange(-90.0, 90.0);
 
-        QPushButton* button = new QPushButton;
-        button->setText("+");
-        button->setFixedWidth(60);
-        self->connect(button, &QPushButton::pressed, [=](){ on_pushButton_pressed(i, 0); });
-        self->connect(button, &QPushButton::released, [=](){ on_pushButton_released(i); });
+        auto button1 = new QPushButton;
+        button1->setText("+");
+        button1->setFixedWidth(60);
+        self->connect(button1, &QPushButton::pressed, [=](){ on_pushButton_pressed(i, 0); });
+        self->connect(button1, &QPushButton::released, [=](){ on_pushButton_released(i); });
 
-        QPushButton* button2 = new QPushButton;
+        auto button2 = new QPushButton;
         button2->setText("-");
         button2->setFixedWidth(60);
         self->connect(button2, &QPushButton::pressed, [=](){ on_pushButton_pressed(i, 1); });
@@ -430,7 +430,7 @@ void MainWindow::Impl::createPage1Widget()
 
         gridLayout->addWidget(new QLabel(list.at(i)), i, 0);
         gridLayout->addWidget(spin, i, 1);
-        gridLayout->addWidget(button, i, 2);
+        gridLayout->addWidget(button1, i, 2);
         gridLayout->addWidget(button2, i, 3);
     }
 
@@ -645,7 +645,7 @@ void CartesianWidget::createGridGroupBox1()
     auto gridLayout = new QGridLayout;
     for(int i = 0; i < NumButtons; ++i) {
         ButtonInfo& info = buttonInfo[i];
-        QPushButton* button = new QPushButton;
+        auto button = new QPushButton;
         button->setText(info.label);
         button->setFixedWidth(60);
         connect(button, &QPushButton::pressed, [=](){ on_pushButton_pressed(i); });
@@ -665,7 +665,7 @@ void CartesianWidget::createGridGroupBox2()
     auto gridLayout = new QGridLayout;
     for(int i = 0; i < NumButtons; ++i) {
         ButtonInfo& info = buttonInfo2[i];
-        QPushButton* button = new QPushButton;
+        auto button = new QPushButton;
         button->setText(info.label);
         button->setFixedWidth(60);
         connect(button, &QPushButton::pressed, [=](){ on_pushButton_2_pressed(i); });
