@@ -154,11 +154,11 @@ JointWidget::JointWidget(QWidget* parent)
         spin->setValue(30.0);
         spin->setRange(-90.0, 90.0);
 
-        auto button1 = new QToolButton;
-        button1->setText("+");
-        button1->setFixedWidth(60);
-        connect(button1, &QToolButton::pressed, [=](){ on_toolButton_pressed(i, 0); });
-        connect(button1, &QToolButton::released, [=](){ on_toolButton_released(i); });
+        auto button = new QToolButton;
+        button->setText("+");
+        button->setFixedWidth(60);
+        connect(button, &QToolButton::pressed, [=](){ on_toolButton_pressed(i, 0); });
+        connect(button, &QToolButton::released, [=](){ on_toolButton_released(i); });
 
         auto button2 = new QToolButton;
         button2->setText("-");
@@ -168,7 +168,7 @@ JointWidget::JointWidget(QWidget* parent)
 
         gridLayout->addWidget(new QLabel(list.at(i)), i, 0);
         gridLayout->addWidget(spin, i, 1);
-        gridLayout->addWidget(button1, i, 2);
+        gridLayout->addWidget(button, i, 2);
         gridLayout->addWidget(button2, i, 3);
     }
 
