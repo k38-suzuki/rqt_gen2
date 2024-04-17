@@ -53,10 +53,10 @@ public:
     TwistWidget(QWidget* parent = nullptr);
 
 private:
-    void joyCallback(const sensor_msgs::Joy& msg);
-
     void on_toolButton_toggled(bool checked);
     void on_timer_timeout();
+
+    void joyCallback(const sensor_msgs::Joy& msg);
 
     QDoubleSpinBox* twistSpins[2];
     QTimer* timer;
@@ -264,11 +264,6 @@ TwistWidget::TwistWidget(QWidget* parent)
     setLayout(layout);
 }
 
-void TwistWidget::joyCallback(const sensor_msgs::Joy& msg)
-{
-    latestJoyState = msg;
-}
-
 void TwistWidget::on_toolButton_toggled(bool checked)
 {
     if(checked) {
@@ -322,6 +317,11 @@ void TwistWidget::on_timer_timeout()
         twist_msg.twist_angular_z = twist_angular[2];
     }
     twist_pub.publish(twist_msg);
+}
+
+void TwistWidget::joyCallback(const sensor_msgs::Joy& msg)
+{
+    latestJoyState = msg;
 }
 
 HomeWidget::HomeWidget(QWidget* parent)
